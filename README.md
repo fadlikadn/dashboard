@@ -48,3 +48,9 @@ export default tseslint.config({
   },
 })
 ```
+
+##TODO:
+create building block: https://ui.shadcn.com/blocks#blocks
+figma reference: 
+- https://www.figma.com/community/file/1294259723229617122/doctor-patient-dashboard
+- https://www.figma.com/community/file/1171394209400750256/medical-dashboard
