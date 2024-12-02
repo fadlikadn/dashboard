@@ -1,7 +1,8 @@
-import { createColumnHelper, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
+import { ColumnDef, createColumnHelper, flexRender, getCoreRowModel, useReactTable } from "@tanstack/react-table"
 import { Patient } from "../types/generic"
-import { useReducer, useState } from "react"
+import { useEffect, useReducer, useState } from "react"
 import { Button } from "./ui/button"
+import { DataTable } from "./DataTable"
 
 const patientDataList: Patient[] = [
   {
@@ -72,6 +73,33 @@ const patientDataList: Patient[] = [
   },
 ]
 
+const patientColumns: ColumnDef<Patient>[] = [
+  {
+    accessorKey: 'name',
+    header: 'Name',
+  },
+  {
+    accessorKey: 'age',
+    header: 'Age',
+  },
+  {
+    accessorKey: 'gender',
+    header: 'Gender',
+  },
+  {
+    accessorKey: 'contact.email',
+    header: 'Email',
+  },
+  {
+    accessorKey: 'contact.phone',
+    header: 'Phone',
+  },
+]
+
+async function getData(): Promise<Patient[]> {
+  return patientDataList
+}
+
 const columnHelper = createColumnHelper<Patient>()
 
 const columns = [
@@ -115,7 +143,7 @@ const columns = [
 ]
 
 const PatientList = () => {
-  const [listData, setListData] = useState(() => [...patientDataList])
+  const [listData, setListData] = useState<Patient[]>([])
   const rerender = useReducer(() => ({}), {})[1]
 
   const table = useReactTable({
@@ -124,9 +152,18 @@ const PatientList = () => {
     getCoreRowModel: getCoreRowModel<Patient>(),
   })
 
+  const gettingData = async () => {
+    const data = await getData()
+    setListData(data)
+  }
+
+  useEffect(() => {
+    gettingData()
+  }, [])
+
   return (
     <div className="p-2 text-justify">
-      <table>
+      {/* <table>
         <thead>
           {table.getHeaderGroups().map(headerGroup => (
             <tr key={headerGroup.id}>
@@ -155,23 +192,8 @@ const PatientList = () => {
             </tr>
           ))}
         </tbody>
-        {/* <tfoot>
-          {table.getFooterGroups().map(footerGroup => (
-            <tr key={footerGroup.id}>
-              {footerGroup.headers.map(header => (
-                <th key={header.id}>
-                  {header.isPlaceholder
-                    ? null
-                    : flexRender(
-                        header.column.columnDef.footer,
-                        header.getContext()
-                      )}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </tfoot> */}
-      </table>
+      </table> */}
+      <DataTable columns={patientColumns} data={patientDataList} />
       <div className="h-4">
         <Button onClick={() => rerender()} className="border p-2">
           Rerender
