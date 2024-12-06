@@ -1,23 +1,20 @@
 import './index.css'
 import PatientDashboard from './components/PatientDashboard'
-import { BrowserRouter, Route, Routes } from 'react-router'
 import MainLayout from './components/layout/MainLayout'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { PatientContextProvider } from './providers/PatientContext'
+
+const queryClient = new QueryClient()
 
 function App() {
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={
-          <MainLayout>
-             <Routes>
-              <Route index element={<PatientDashboard />} />
-              <Route path="about" element={<h1>About</h1>} />
-            </Routes>
-          </MainLayout>
-        }>
-        </Route>
-      </Routes>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <MainLayout>
+        <PatientContextProvider>
+          <PatientDashboard />
+        </PatientContextProvider>
+      </MainLayout>
+    </QueryClientProvider>
   )
 }
 

@@ -54,3 +54,13 @@ create building block: https://ui.shadcn.com/blocks#blocks
 figma reference: 
 - https://www.figma.com/community/file/1294259723229617122/doctor-patient-dashboard
 - https://www.figma.com/community/file/1171394209400750256/medical-dashboard
+
+
+backend: nodejs with typeorm and typescript
+https://medium.com/@christianinyekaka/building-a-rest-api-with-typescript-express-typeorm-authentication-authorization-and-postgres-e87d07d1af08
+https://github.com/chrisBokotaII/typeOrm-api
+
+
+## Tanstack Query
+https://dev.to/samuel_kinuthia/mastering-tanstack-query-a-comprehensive-guide-to-efficient-data-fetching-in-react-508p
+https://tanstack.com/query/latest/docs/framework/react/examples/basic
