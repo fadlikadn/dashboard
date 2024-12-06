@@ -64,3 +64,9 @@ https://github.com/chrisBokotaII/typeOrm-api
 ## Tanstack Query
 https://dev.to/samuel_kinuthia/mastering-tanstack-query-a-comprehensive-guide-to-efficient-data-fetching-in-react-508p
 https://tanstack.com/query/latest/docs/framework/react/examples/basic
+
+https://www.quantizeanalytics.co.uk/tableau-healthcare-dashboard-examples/
+https://fuselabcreative.com/healthcare-dashboard-design-best-practices/
+
+https://github.com/shadcn-ui/ui/discussions/3244
+https://v0.dev/t/lOQujREAOrk
