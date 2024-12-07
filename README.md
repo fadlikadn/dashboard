@@ -70,3 +70,6 @@ https://fuselabcreative.com/healthcare-dashboard-design-best-practices/
 
 https://github.com/shadcn-ui/ui/discussions/3244
 https://v0.dev/t/lOQujREAOrk
+
+# Simulate trigger websocket using CURL
+curl -X POST http://localhost:3001/broadcast

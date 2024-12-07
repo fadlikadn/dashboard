@@ -3,7 +3,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
 import { useQueryFetchPatientAllergies, useQueryFetchPatientAppointments, useQueryFetchPatientDetail, useQueryFetchPatientDiagnoses, useQueryFetchPatientMedications } from "@/lib/api/patient-api"
 import { Patient, PatientAllergy, PatientAppointment, PatientDiagnosis, PatientMedication } from "@/types/generic"
-import { FC } from "react"
+import { FC, useEffect } from "react"
+import { useQueryClient } from "@tanstack/react-query"
+import useWebSocket from "react-use-websocket"
+import { Button } from "./ui/button"
 
 interface PatientCardProps {
   patient: Patient
@@ -190,8 +193,10 @@ const PatientAppointments: FC<PatientAppointmentsProps> = ({ appointments }) => 
   )
 }
 
+const WS_URL = 'ws://localhost:3001'
 
 const PatientDetail = () => {
+  const queryClient = useQueryClient()
   const { id } = useParams<{id: string}>()
 
   const { 
@@ -214,6 +219,36 @@ const PatientDetail = () => {
     isSuccess: isSuccessPatientAppointments,
     data: dataPatientAppointments
   } = useQueryFetchPatientAppointments(id || '')
+  
+  const { sendJsonMessage, lastJsonMessage, readyState } = useWebSocket(WS_URL, {
+    onOpen: () => {
+      console.log('Websocket connection enabled')
+      sendJsonMessage({ event: 'register', data: { clientId: id }})
+    },
+    share: true,
+    shouldReconnect: () => true,
+  })
+
+  useEffect(() => {
+    console.log("Connection state change", readyState)
+  }, [readyState])
+
+  const refetchAppointments = async () => {
+    await queryClient.invalidateQueries({
+      queryKey: ['patients', id, 'appointments'],
+      refetchType: 'active',
+      exact: true,
+    })
+  }
+
+  useEffect(() => {
+    console.log('got new message', lastJsonMessage)
+    const message = lastJsonMessage as { type: string }
+    if (lastJsonMessage && message.type === "NEW_APPOINTMENT") {
+      refetchAppointments()
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lastJsonMessage])
 
   return (
     <div className="container mx-auto p-6">
@@ -239,6 +274,12 @@ const PatientDetail = () => {
         {isSuccessPatientAppointments && (
           <PatientAppointments appointments={dataPatientAppointments} />
         )}
+
+        <Button onClick={
+          () => {
+            sendJsonMessage({ event: 'NEW_APPOINTMENT', data: { clientId: id }})
+          }
+        }>Test Refetch Appointments WS</Button>
       </div>
     </div>
   )

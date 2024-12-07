@@ -6,6 +6,7 @@ export interface PatientContextStateInterface {
   selectedPatient: Patient | null
   isPatientDialogOpen: boolean
   loadingStart: boolean
+  socket: WebSocket | null
 }
 
 export interface PatientContextInterface {
@@ -14,6 +15,7 @@ export interface PatientContextInterface {
   setSelectedPatient: (patient: Patient) => void
   setPatientDialogOpen: (isOpen: boolean) => void
   setLoadingStart: (loading: boolean) => void
+  setSocket: (socket: WebSocket) => void
 }
 
 const defaultValue: PatientContextInterface = {
@@ -22,11 +24,13 @@ const defaultValue: PatientContextInterface = {
     selectedPatient: null,
     isPatientDialogOpen: false,
     loadingStart: false,
+    socket: null,
   },
   setSelectedPatientId: () => {},
   setSelectedPatient: () => {},
   setPatientDialogOpen: () => {},
   setLoadingStart: () => {},
+  setSocket: () => {},
 }
 
 const PatientContext = createContext<PatientContextInterface>(defaultValue)
@@ -40,6 +44,7 @@ export const PatientContextProvider: FC<PatientProviderProps> = ({ children }) =
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
   const [isPatientDialogOpen, setPatientDialogOpen] = useState<boolean>(false)
   const [loadingStart, setLoadingStart] = useState<boolean>(false)
+  const [socket, setSocket] = useState<WebSocket | null>(null)
 
   const contextValue: PatientContextInterface = {
     state: {
@@ -47,11 +52,13 @@ export const PatientContextProvider: FC<PatientProviderProps> = ({ children }) =
       selectedPatient,
       isPatientDialogOpen,
       loadingStart,
+      socket,
     },
     setSelectedPatientId,
     setSelectedPatient,
     setPatientDialogOpen,
     setLoadingStart,
+    setSocket
   }
 
   return (
