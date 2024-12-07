@@ -16,7 +16,9 @@ export interface PatientMedication {
 export interface PatientAppointment {
   id?: string
   date: string
-  room: string
+  time: string
+  doctor: string
+  department: string
   patient?: string
 }
 

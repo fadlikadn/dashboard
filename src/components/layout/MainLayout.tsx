@@ -30,7 +30,7 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="#">
+                <BreadcrumbLink href="/">
                   Patient Dashboard
                 </BreadcrumbLink>
               </BreadcrumbItem>

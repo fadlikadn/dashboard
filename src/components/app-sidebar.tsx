@@ -14,6 +14,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { NavLink } from "react-router"
 
 // This is sample data.
 const data = {
@@ -25,12 +26,12 @@ const data = {
       items: [
         {
           title: "Home",
-          url: "#",
-          isActive: true
+          url: "/",
+          // isActive: true
         },
         // {
-        //   title: "Detail",
-        //   url: "#",
+        //   title: "Patient",
+        //   url: "/patient",
         // },
       ],
     },
@@ -71,8 +72,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <SidebarMenu>
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.isActive}>
-                      <a href={item.url}>{item.title}</a>
+                    <SidebarMenuButton asChild>
+                      <NavLink 
+                        to={item.url} 
+                        key={item.url} 
+                        className={({ isActive }) => isActive || location.pathname === item.url ? 'active' : ''}
+                      >
+                        {item.title}
+                      </NavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
