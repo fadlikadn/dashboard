@@ -1,11 +1,33 @@
-import { Patient, PatientAllergy, PatientAppointment, PatientDiagnosis, PatientMedication } from "@/types/generic";
+import { LoginResponse, Patient, PatientAllergy, PatientAppointment, PatientDiagnosis, PatientMedication } from "@/types/generic";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 const baseAPIUrl = "http://localhost:3001/";
 
+const getToken = (): string | null => {
+  return sessionStorage.getItem('token');
+}
+
+export const fetchWithToken = async (url: string, options: RequestInit = {}): Promise<Response> => {
+  const token = getToken()
+  const headers = {
+    ...options.headers,
+    'Authorization': token ? `Bearer ${token}` : '',
+  }
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  })
+
+  if (!response.ok) {
+    throw new Error(`Error: ${response.status} ${response.statusText}`);
+  }
+
+  return response
+}
+
 const fetchPatients = async (): Promise<Array<Patient>> => {
   try {
-    const response = await fetch(`${baseAPIUrl}patients`);
+    const response = await fetchWithToken(`${baseAPIUrl}patients`);
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
@@ -18,7 +40,7 @@ const fetchPatients = async (): Promise<Array<Patient>> => {
 
 const fetchPatientDetail = async (id: string): Promise<Patient> => {
   try {
-    const response = await fetch(`${baseAPIUrl}patients/${id}`);
+    const response = await fetchWithToken(`${baseAPIUrl}patients/${id}`);
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
@@ -31,7 +53,7 @@ const fetchPatientDetail = async (id: string): Promise<Patient> => {
 
 const fetchPatientDiagnoses = async (id: string): Promise<Array<PatientDiagnosis>> => {
   try {
-    const response = await fetch(`${baseAPIUrl}patients/${id}/diagnoses`);
+    const response = await fetchWithToken(`${baseAPIUrl}patients/${id}/diagnoses`);
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
@@ -44,7 +66,7 @@ const fetchPatientDiagnoses = async (id: string): Promise<Array<PatientDiagnosis
 
 const fetchPatientMedications = async (id: string): Promise<Array<PatientMedication>> => {
   try {
-    const response = await fetch(`${baseAPIUrl}patients/${id}/medications`);
+    const response = await fetchWithToken(`${baseAPIUrl}patients/${id}/medications`);
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
@@ -57,7 +79,7 @@ const fetchPatientMedications = async (id: string): Promise<Array<PatientMedicat
 
 const fetchPatientAllergies = async (id: string): Promise<Array<PatientAllergy>> => {
   try {
-    const response = await fetch(`${baseAPIUrl}patients/${id}/allergies`);
+    const response = await fetchWithToken(`${baseAPIUrl}patients/${id}/allergies`);
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
@@ -70,7 +92,7 @@ const fetchPatientAllergies = async (id: string): Promise<Array<PatientAllergy>>
 
 const fetchPatientAppointments = async (id: string): Promise<Array<PatientAppointment>> => {
   try {
-    const response = await fetch(`${baseAPIUrl}patients/${id}/appointments`);
+    const response = await fetchWithToken(`${baseAPIUrl}patients/${id}/appointments`);
     if (!response.ok) {
       throw new Error(`Error: ${response.status} ${response.statusText}`);
     }
@@ -79,6 +101,31 @@ const fetchPatientAppointments = async (id: string): Promise<Array<PatientAppoin
     console.error(`Failed to fetch patient appointments for ID ${id}:`, error);
     throw error;
   }
+};
+
+const fetchLogin = async (username: string, password: string): Promise<LoginResponse> => {
+  try {
+    const response = await fetch(`${baseAPIUrl}login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ username, password }),
+    });
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+    return response.json();
+  } catch (error) {
+    console.error('Failed to login:', error);
+    throw error;
+  }
+}
+
+export const useMutationLogin = () => {
+  return useMutation<LoginResponse, Error, { username: string, password: string }>({
+    mutationFn: ({ username, password }) => fetchLogin(username, password),
+  });
 };
 
 export const useQueryFetchPatients = () => {

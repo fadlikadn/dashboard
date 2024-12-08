@@ -45,3 +45,7 @@ export interface Patient {
   allergies?: PatientAllergy[]
   appointments: PatientAppointment[]
 }
+
+export interface LoginResponse {
+  token: string
+}

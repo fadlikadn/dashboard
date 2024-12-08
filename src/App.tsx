@@ -6,24 +6,29 @@ import { PatientContextProvider } from './providers/PatientContext'
 import { BrowserRouter, Route, Routes } from 'react-router'
 import PatientDetail from './components/PatientDetail'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import Login from './components/Login'
+import { AuthProvider } from './providers/AuthContext'
+import ProtectedRoute from './components/ProtectedRoute'
 
 const queryClient = new QueryClient()
 
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <MainLayout>
-          <PatientContextProvider>
-              <Routes>
-                <Route path="/" element={<PatientDashboard />} />
-                <Route path="/patient/:id" element={<PatientDetail />} />
-              </Routes>
-            {/* <PatientDashboard /> */}
-          </PatientContextProvider>
-        </MainLayout>
-      </BrowserRouter>
-      <ReactQueryDevtools initialIsOpen={false} />
+      <AuthProvider>
+        <BrowserRouter>
+            <PatientContextProvider>
+                <Routes>
+                  <Route path="/login" element={<Login />} />
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/" element={<MainLayout><PatientDashboard /></MainLayout>} />
+                    <Route path="/patient/:id" element={<MainLayout><PatientDetail /></MainLayout>} />
+                  </Route>
+                </Routes>
+            </PatientContextProvider>
+        </BrowserRouter>
+      </AuthProvider>
+      <ReactQueryDevtools initialIsOpen={false} position='bottom-right' />
     </QueryClientProvider>
   )
 }
