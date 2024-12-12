@@ -121,6 +121,7 @@ Patients:
 - Add miragejs for mocking data
 - Add more features to the dashboard
 - Add more API endpoints
+- implement filters, sorting, pagination -> from FE and API as well
 
 ### References:
 - https://ui.shadcn.com/blocks

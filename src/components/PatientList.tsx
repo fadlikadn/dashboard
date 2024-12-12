@@ -64,7 +64,7 @@ interface PatientListProps {
 const PatientList: FC<PatientListProps> = ({ patientList = [] }) => {
   return (
     <div className="text-justify bg-white min-w-full">
-      <DataTable columns={patientColumns} data={patientList} />
+      <DataTable columns={patientColumns} data={patientList} filterColumn="email" />
     </div>
   )
 }

@@ -19,6 +19,11 @@ export const fetchWithToken = async (url: string, options: RequestInit = {}): Pr
   })
 
   if (!response.ok) {
+    if (response.status === 401) {
+      console.error('Unauthorized request. Logging out...');
+      sessionStorage.removeItem('token');
+      window.location.reload();
+    }
     throw new Error(`Error: ${response.status} ${response.statusText}`);
   }
 
