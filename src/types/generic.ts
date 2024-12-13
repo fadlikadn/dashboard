@@ -49,3 +49,10 @@ export interface Patient {
 export interface LoginResponse {
   token: string
 }
+
+export interface PatientResponse<T> {
+  data: Array<T>
+  total: number
+  page: number
+  lastPage: number
+}

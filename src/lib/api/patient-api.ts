@@ -43,6 +43,25 @@ const fetchPatients = async (): Promise<Array<Patient>> => {
   }
 };
 
+const fetchPatientsPagination = async (page: number, pageSize: number): Promise<{ data: Array<Patient>, total: number, page: number, lastPage: number }> => {
+  try {
+    const response = await fetchWithToken(`${baseAPIUrl}patients?page=${page}&pageSize=${pageSize}`);
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+    const data = await response.json();
+    return {
+      data,
+      total: data.length,
+      page,
+      lastPage: Math.ceil(data.length / pageSize),
+    };
+  } catch (error) {
+    console.error('Failed to fetch patients:', error);
+    throw error; // Re-throw the error after logging it
+  }
+};
+
 const fetchPatientDetail = async (id: string): Promise<Patient> => {
   try {
     const response = await fetchWithToken(`${baseAPIUrl}patients/${id}`);
@@ -137,6 +156,13 @@ export const useQueryFetchPatients = () => {
   return useQuery<Array<Patient>>({
     queryKey: ['patients'],
     queryFn: fetchPatients,
+  })
+}
+
+export const useQueryFetchPatientsPagination = (page: number, pageSize: number) => {
+  return useQuery<{ data: Array<Patient>, total: number, page: number, lastPage: number }>({
+    queryKey: ['patients', page, pageSize],
+    queryFn: () => fetchPatientsPagination(page, pageSize),
   })
 }
 
