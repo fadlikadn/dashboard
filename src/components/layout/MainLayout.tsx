@@ -1,4 +1,4 @@
-import { FC, ReactNode } from "react"
+import { FC, ReactNode, useContext } from "react"
 import { AppSidebar } from "@/components/app-sidebar"
 import {
   Breadcrumb,
@@ -14,12 +14,14 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import PatientContext from "@/providers/PatientContext"
 
 interface MainLayoutProps {
   children: ReactNode
 }
 
 const MainLayout: FC<MainLayoutProps> = ({ children }) => {
+  const { state: { selectedPatient }} = useContext(PatientContext)
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -34,10 +36,18 @@ const MainLayout: FC<MainLayoutProps> = ({ children }) => {
                   Patient Dashboard
                 </BreadcrumbLink>
               </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
+              {/* <BreadcrumbSeparator className="hidden md:block" />
               <BreadcrumbItem>
                 <BreadcrumbPage>Home</BreadcrumbPage>
-              </BreadcrumbItem>
+              </BreadcrumbItem> */}
+              {selectedPatient && (
+                <>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{selectedPatient.name}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              )}
             </BreadcrumbList>
           </Breadcrumb>
         </header>

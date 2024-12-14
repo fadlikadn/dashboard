@@ -146,6 +146,31 @@ const fetchLogin = async (username: string, password: string): Promise<LoginResp
   }
 }
 
+const addPatientMedication = async (name: string, dosage: string, frequency: string, patientId: string): Promise<PatientMedication> => {
+  try {
+    const response = await fetchWithToken(`${baseAPIUrl}patients/medications`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ name, dosage, frequency, patientId }),
+    });
+    if (!response.ok) {
+      throw new Error(`Error: ${response.status} ${response.statusText}`);
+    }
+    return await response.json();
+  } catch (error) {
+    console.error(`Failed to add medication for patient ID ${patientId}:`, error);
+    throw error;
+  }
+};
+
+export const useMutationPatientMedication = () => {
+  return useMutation<PatientMedication, Error, { name: string, dosage: string, frequency: string, patientId: string }>({
+    mutationFn: ({ name, dosage, frequency, patientId }) => addPatientMedication(name, dosage, frequency, patientId),
+  });
+}
+
 export const useMutationLogin = () => {
   return useMutation<LoginResponse, Error, { username: string, password: string }>({
     mutationFn: ({ username, password }) => fetchLogin(username, password),

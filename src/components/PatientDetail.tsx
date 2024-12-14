@@ -1,12 +1,15 @@
 import { useParams } from "react-router"
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table"
-import { useQueryFetchPatientAllergies, useQueryFetchPatientAppointments, useQueryFetchPatientDetail, useQueryFetchPatientDiagnoses, useQueryFetchPatientMedications } from "@/lib/api/patient-api"
+import { useMutationPatientMedication, useQueryFetchPatientAllergies, useQueryFetchPatientAppointments, useQueryFetchPatientDetail, useQueryFetchPatientDiagnoses, useQueryFetchPatientMedications } from "@/lib/api/patient-api"
 import { Patient, PatientAllergy, PatientAppointment, PatientDiagnosis, PatientMedication } from "@/types/generic"
-import { FC, useEffect } from "react"
+import { FC, useContext, useEffect } from "react"
 import { useQueryClient } from "@tanstack/react-query"
 import useWebSocket from "react-use-websocket"
 import { Button } from "./ui/button"
+import PatientContext from "@/providers/PatientContext"
+import { useForm } from "react-hook-form"
+import { Input } from "./ui/input"
 
 interface PatientCardProps {
   patient: Patient
@@ -115,6 +118,46 @@ interface PatientMedicationsProps {
   medications: PatientMedication[]
 }
 const PatientMedications: FC<PatientMedicationsProps> = ({ medications }) => {
+  const queryClient = useQueryClient()
+  const { state: { selectedPatient }} = useContext(PatientContext)
+  const mutationMedication = useMutationPatientMedication()
+
+  const useFormMedicine = useForm<PatientMedication>({
+    mode: 'onSubmit',
+    reValidateMode: 'onBlur',
+    defaultValues: {
+      name: '',
+      dosage: '',
+      frequency: '',
+    },
+  })
+
+  const { register, handleSubmit, reset, formState: { errors } } = useFormMedicine
+
+  const onSubmit = (data: PatientMedication) => {
+    mutationMedication.mutate({
+      name: data.name,
+      dosage: data.dosage,
+      frequency: data.frequency,
+      patientId: selectedPatient?.id || '',
+    }, {
+      onSuccess: async (response) => {
+        console.log('Medication added:', response)
+        await queryClient.invalidateQueries({
+          queryKey: ['patients', selectedPatient?.id || '', 'medications'],
+          refetchType: 'active',
+          exact: true,
+        })
+      }, 
+      onError: (error) => {
+        console.error(error)
+      },
+    })
+    // Handle form submission, e.g., send data to the server
+    reset()
+  }
+
+
   return (
     <Card className="p-6">
       <CardHeader>
@@ -139,6 +182,40 @@ const PatientMedications: FC<PatientMedicationsProps> = ({ medications }) => {
             <span className="font-semibold">Cetirizine:</span> 10mg as needed
           </li> */}
         </ul>
+        <form onSubmit={handleSubmit(onSubmit)} className="mt-4 space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <Input
+              {...register('name', { required: 'Name is required' })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+            {errors.name && <p className="mt-2 text-sm text-red-600">{errors.name.message}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Dosage</label>
+            <Input
+              {...register('dosage', { required: 'Dosage is required' })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+            {errors.dosage && <p className="mt-2 text-sm text-red-600">{errors.dosage.message}</p>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Frequency</label>
+            <Input
+              {...register('frequency', { required: 'Frequency is required' })}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            />
+            {errors.frequency && <p className="mt-2 text-sm text-red-600">{errors.frequency.message}</p>}
+          </div>
+          <div>
+            <button
+              type="submit"
+              className="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+            >
+              Add Medication
+            </button>
+          </div>
+        </form>
       </CardContent>
     </Card>
   )
@@ -198,6 +275,7 @@ const WS_URL = 'ws://localhost:3001'
 const PatientDetail = () => {
   const queryClient = useQueryClient()
   const { id } = useParams<{id: string}>()
+  const { state: { selectedPatient }, setSelectedPatient} = useContext(PatientContext)
 
   const { 
     isSuccess: isSuccessPatientDetail,
@@ -233,6 +311,13 @@ const PatientDetail = () => {
     console.log("Connection state change", readyState)
   }, [readyState])
 
+  useEffect(() => {
+    if (!selectedPatient && isSuccessPatientDetail) {
+      setSelectedPatient(dataPatientDetail)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSuccessPatientDetail])
+
   const refetchAppointments = async () => {
     await queryClient.invalidateQueries({
       queryKey: ['patients', id, 'appointments'],
@@ -242,7 +327,7 @@ const PatientDetail = () => {
   }
 
   useEffect(() => {
-    console.log('got new message', lastJsonMessage)
+    // console.log('got new message', lastJsonMessage)
     const message = lastJsonMessage as { type: string }
     if (lastJsonMessage && message.type === "NEW_APPOINTMENT") {
       refetchAppointments()
